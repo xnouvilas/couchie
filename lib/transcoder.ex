@@ -25,14 +25,14 @@ defmodule Couchie.Transcoder do
 
   # Decoder
 
-  def decode_value(flag, value) when (@raw_flag &&& flag) === @raw_flag,
-    do: decode_value(flag ^^^ @raw_flag, :erlang.binary_to_term(value))
-
-  def decode_value(flag, value) when (@json_flag &&& flag) === @json_flag,
-    do: decode_value(flag ^^^ @json_flag, Poison.decode!(value, keys: :atoms))
-
-  def decode_value(flag, value) when (@str_flag &&& flag) === @str_flag,
-    do: decode_value(flag ^^^ @str_flag, value)
+  # def decode_value(flag, value) when (@raw_flag &&& flag) === @raw_flag,
+  #   do: decode_value(flag ^^^ @raw_flag, :erlang.binary_to_term(value))
+  #
+  # def decode_value(flag, value) when (@json_flag &&& flag) === @json_flag,
+  #   do: decode_value(flag ^^^ @json_flag, Poison.decode!(value, keys: :atoms))
+  #
+  # def decode_value(flag, value) when (@str_flag &&& flag) === @str_flag,
+  #   do: decode_value(flag ^^^ @str_flag, value)
 
   def decode_value(_, value), do: value
 
