@@ -83,6 +83,9 @@ defmodule Couchie do
 	def set(connection, key, document, expiration),
 		do:	:cberl.set(connection, key, expiration, document)  # NOTE: cberl parameter order is different!
 
+	def set(connection, key, document, expiration, type),
+		do:	:cberl.set(connection, key, expiration, document, type)  # NOTE: cberl parameter order is different!
+
 	def save(element, bucket),
 		do: set(bucket, to_string(element[:id]), element)
 
@@ -120,7 +123,7 @@ defmodule Couchie do
 		do: Poison.decode!(data, keys: :atoms)
 
 	def decode({ _id, _query, data}, :list),
-		do: [data] # LOL, fix
+		do: Couchie.Parser.parse!(data)
 
 	def decode({ _id, _query, data}, :none),
 		do: data
