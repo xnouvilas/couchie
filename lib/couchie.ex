@@ -136,7 +136,7 @@ defmodule Couchie do
 
   def select(n1ql_query, :full) do
     body = Poison.encode!(%{statement: n1ql_query})
-		select_user = Application.get_env(:dm, Couchie)[:select]
+		select_user = Application.get_env(:couchie, Couchie)[:select]
     identification = [
       hackney: [basic_auth: {select_user[:user], select_user[:password]}],
       timeout: 60_000,
@@ -146,7 +146,7 @@ defmodule Couchie do
   end
 
   def query(body, identification) do
-		base_url = Application.get_env(:dm, Couchie)[:base_url]
+		base_url = Application.get_env(:couchie, Couchie)[:base_url]
 		headers = %{"Content-Type" => "application/json"}
     case HTTPoison.post(base_url, body, headers, identification) do
       {:ok, %{body: body}} ->

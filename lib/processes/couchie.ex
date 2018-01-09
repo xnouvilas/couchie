@@ -4,9 +4,9 @@ defmodule Processes.Couchie do
   def start_link(opts \\ []) do
     result = GenServer.start_link(__MODULE__, opts)
 
-    admin_user = Application.get_env(:dm, Couchie)[:admin]
+    admin_user = Application.get_env(:couchie, Couchie)[:admin]
 
-    Application.get_env(:dm, Couchie)[:buckets]
+    Application.get_env(:couchie, Couchie)[:buckets]
 		|> Enum.each(fn(bucket) -> start(bucket, admin_user) end)
 
     result
