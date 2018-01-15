@@ -77,7 +77,7 @@ defmodule Couchie.Macros.CouchbaseModel do
       def argument(field, value) when is_bitstring(value),
         do: "#{to_string(field)} = '#{to_string(value)}'"
 
-      def argument(field, value) when is_bitstring(value),
+      def argument(field, value),
         do: "#{to_string(field)} = #{to_string(value)}"
 
 
