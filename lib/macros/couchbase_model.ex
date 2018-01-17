@@ -10,7 +10,7 @@ defmodule Couchie.Macros.CouchbaseModel do
       def set(id, data),
         do: Couchie.set(unquote(table), to_string(id), data)
 
-      def delete(id, data),
+      def delete(id),
         do: Couchie.delete(unquote(table), to_string(id))
 
 
