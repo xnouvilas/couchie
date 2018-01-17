@@ -10,6 +10,9 @@ defmodule Couchie.Macros.CouchbaseModel do
       def set(id, data),
         do: Couchie.set(unquote(table), to_string(id), data)
 
+      def delete(id, data),
+        do: Couchie.delete(unquote(table), to_string(id))
+
 
       def last,
         do: find()
