@@ -1,6 +1,13 @@
 defmodule Couchie.Macros.CouchbaseModel do
 
-  defmacro couchbase_find(table) do
+  defmacro couchbase_find(model_table) do
+
+    table = case Application.get_env(:couchie, Couchie)[:buckets] do
+      ["tests"] ->
+        :tests
+      _ ->
+        model_table
+    end
 
     quote do
 
