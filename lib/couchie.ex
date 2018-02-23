@@ -150,7 +150,7 @@ defmodule Couchie do
 
   def query(body, identification) do
 		base_url = Application.get_env(:couchie, Couchie)[:base_url]
-		headers = %{"Content-Type" => "application/json"}
+		headers = %{"Content-Type" => "application/json", "timeout" => 20000}
     case HTTPoison.post(base_url, body, headers, identification) do
       {:ok, %{body: body}} ->
         Poison.decode!(body, keys: :atoms)
