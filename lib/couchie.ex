@@ -10,6 +10,34 @@ defmodule Couchie do
 	To store raw data, pass in a binary.
 	"""
 
+	def url(:domain),
+		do: "http://localhost"
+
+	def url(:n1ql),
+		do: url(:domain) <> ":8093/query/service"
+
+	def url(:view),
+		do: url(:domain) <> ":8092"
+
+	def url(:view, bucket, view),
+		do: "#{url(:view)}/#{bucket}/_design/#{view}/_view/#{view}"
+
+	def url(:view, bucket, view, options) when is_list(options) do
+		url = "#{url(:view, bucket, view)}"
+
+		params = options
+		|> Enum.map(fn{key, value} -> "#{key}=#{value}" end)
+		|> Enum.join("&")
+
+		"#{url}?#{params}"
+	end
+
+def url(:view, bucket, view, id) do
+	"#{url(:view, bucket, view)}" <>
+	"?limit=6&stale=false&connection_timeout=60000&inclusive_end=true" <>
+	"&skip=0&full_set=&group=true&key=%22#{id}%22"
+end
+
 	@doc """
 	Open a connection pool to the server:
 	Open takes a connection configuration consisting of connection name,
@@ -132,32 +160,67 @@ defmodule Couchie do
 		do: nil
 
 
-  def select(n1ql_query) do
-    %{results: results} = select(n1ql_query, :full)
-    results
+	def identification(user_type) do
+		select_user = Application.get_env(:couchie, Couchie)[user_type]
+		[
+			hackney: [basic_auth: {select_user[:user], select_user[:password]}],
+			timeout: 60_000,
+			recv_timeout: 60_000
+		]
+	end
+
+
+  def select(n1ql_query),
+    do: select(n1ql_query, :content)
+
+  def select(n1ql_query, :content),
+    do: select(n1ql_query, :full) |> Map.get(:results)
+
+  def select(n1ql_query, :full),
+    do: query(Poison.encode!(%{statement: n1ql_query}))
+
+
+  def query(body) do
+
+		headers = %{"Content-Type" => "application/json", "timeout" => 60000}
+
+    HTTPoison.post(url(:n1ql), body, headers, identification(:select))
+		|> query_result
   end
 
-  def select(n1ql_query, :full) do
-    body = Poison.encode!(%{statement: n1ql_query})
-		select_user = Application.get_env(:couchie, Couchie)[:select]
-    identification = [
-      hackney: [basic_auth: {select_user[:user], select_user[:password]}],
-      timeout: 60_000,
-      recv_timeout: 60_000
-    ]
-    query(body, identification)
-  end
 
-  def query(body, identification) do
-		base_url = Application.get_env(:couchie, Couchie)[:base_url]
-		headers = %{"Content-Type" => "application/json", "timeout" => 60_000, "recv_timeout" => 50_000}
-    case HTTPoison.post(base_url, body, headers, identification) do
-      {:ok, %{body: body}} ->
-        Poison.decode!(body, keys: :atoms)
-      {:error, error} ->
-        raise error
-    end
-  end
+	def view(bucket, view, id),
+		do: view(bucket, view, id, :content)
+
+	def view(bucket, view, id, :content) do
+		case view(bucket, view, id, :full) do
+			%{rows: []} ->
+				[]
+			%{rows: [result | _]} ->
+				result.value
+		end
+	end
+
+	def view(bucket, view, id, :full),
+		do: query_view(bucket, view, id)
+
+
+	def query_view(bucket, view, id) do
+
+		headers = %{"Content-Type" => "application/json", "timeout" => 60000}
+
+		url(:view, bucket, view, id)
+		|> HTTPoison.get(headers, identification(:select))
+		|> query_result
+	end
+
+
+	def query_result({:ok, %{body: body}}),
+		do: Poison.decode!(body, keys: :atoms)
+
+	def query_result({:error, error}),
+		do: raise error
+
 
 
 	@doc """
