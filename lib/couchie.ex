@@ -34,7 +34,7 @@ defmodule Couchie do
 
 def url(:view, bucket, view, id) do
 	"#{url(:view, bucket, view)}" <>
-	"?limit=6&stale=false&connection_timeout=60000&inclusive_end=true" <>
+	"?limit=6&stale=false&connection_timeout=120000&inclusive_end=true" <>
 	"&skip=0&full_set=&group=true&key=%22#{id}%22"
 end
 
@@ -164,8 +164,8 @@ end
 		select_user = Application.get_env(:couchie, Couchie)[user_type]
 		[
 			hackney: [basic_auth: {select_user[:user], select_user[:password]}],
-			timeout: 60_000,
-			recv_timeout: 60_000
+			timeout: 120_000,
+			recv_timeout: 120_000
 		]
 	end
 
@@ -182,7 +182,7 @@ end
 
   def query(body) do
 
-		headers = %{"Content-Type" => "application/json", "timeout" => 60000}
+		headers = %{"Content-Type" => "application/json", "timeout" => 120_000}
 
     HTTPoison.post(url(:n1ql), body, headers, identification(:select))
 		|> query_result
@@ -207,7 +207,7 @@ end
 
 	def query_view(bucket, view, id) do
 
-		headers = %{"Content-Type" => "application/json", "timeout" => 60000}
+		headers = %{"Content-Type" => "application/json", "timeout" => 120_000}
 
 		url(:view, bucket, view, id)
 		|> HTTPoison.get(headers, identification(:select))
