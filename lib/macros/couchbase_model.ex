@@ -90,6 +90,9 @@ defmodule Couchie.Macros.CouchbaseModel do
       def argument(field, value) when is_bitstring(value),
         do: "#{to_string(field)} = '#{to_string(value)}'"
 
+      def argument(field, value) when is_list(value),
+        do: "#{to_string(field)} IN [#{value |> Enum.join(",")}]"
+
       def argument(field, value),
         do: "#{to_string(field)} = #{to_string(value)}"
 
