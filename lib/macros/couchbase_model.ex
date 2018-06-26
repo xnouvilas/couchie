@@ -93,6 +93,12 @@ defmodule Couchie.Macros.CouchbaseModel do
       def argument(field, value) when is_list(value),
         do: "#{to_string(field)} IN [#{value |> Enum.join(",")}]"
 
+      def argument(field, value) when is_tuple(value) and is_bitstring(elem(value, 0)),
+        do: "#{to_string(field)} BETWEEN '#{elem(value, 0)}' AND '#{elem(value, 1)}'"
+
+      def argument(field, value) when is_tuple(value),
+        do: "#{to_string(field)} BETWEEN #{elem(value, 0)} AND #{elem(value, 1)}"
+
       def argument(field, value),
         do: "#{to_string(field)} = #{to_string(value)}"
 
