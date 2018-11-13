@@ -20,6 +20,10 @@ defmodule Couchie.Macros.CouchbaseModel do
       def delete(id),
         do: Couchie.delete(unquote(table), to_string(id))
 
+
+      def view(view),
+        do: Couchie.view(unquote(table), view)
+
       def view(view, id),
         do: Couchie.view(unquote(table), view, to_string(id))
 

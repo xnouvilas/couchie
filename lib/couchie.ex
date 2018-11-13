@@ -32,11 +32,11 @@ defmodule Couchie do
 		"#{url}?#{params}"
 	end
 
-def url(:view, bucket, view, id) do
-	"#{url(:view, bucket, view)}" <>
-	"?limit=6&stale=false&connection_timeout=120000&inclusive_end=true" <>
-	"&skip=0&full_set=&group=true&key=%22#{id}%22"
-end
+	def url(:view, bucket, view, id) do
+		"#{url(:view, bucket, view)}" <>
+		"?limit=6&stale=false&connection_timeout=120000&inclusive_end=true" <>
+		"&skip=0&full_set=&group=true&key=%22#{id}%22"
+	end
 
 	@doc """
 	Open a connection pool to the server:
@@ -189,6 +189,9 @@ end
   end
 
 
+	def view(bucket, view),
+		do: query_view(bucket, view)
+
 	def view(bucket, view, id),
 		do: view(bucket, view, id, :content)
 
@@ -205,11 +208,16 @@ end
 		do: query_view(bucket, view, id)
 
 
-	def query_view(bucket, view, id) do
+	def query_view(bucket, view),
+		do: query_view(bucket, view, nil, url(:view, bucket, view))
 
+	def query_view(bucket, view, id),
+		do: query_view(bucket, view, id, url(:view, bucket, view, id))
+
+	def query_view(_bucket, _view, _id, url) do
 		headers = %{"Content-Type" => "application/json", "timeout" => 120_000}
 
-		url(:view, bucket, view, id)
+		url
 		|> HTTPoison.get(headers, identification(:select))
 		|> query_result
 	end
