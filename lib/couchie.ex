@@ -141,10 +141,15 @@ defmodule Couchie do
 	def list(connection, keys, decode_type \\ :map),
 		do: mget(connection, keys, decode_type)
 
-	def mget(connection, keys, decode_type \\ :map) do
-		:cberl.mget(connection, keys)
-		|> Enum.map(fn(result) -> decode(result, decode_type) end)
-	end
+
+	def mget(connection, keys, decode_type \\ :map),
+		do: mget(connection, keys, decode_type, :cberl.mget(connection, keys))
+
+	def mget(_connection, _keys, decode_type, data) when is_list(data),
+		do: data |> Enum.map(fn(result) -> decode(result, decode_type) end)
+
+	def mget(_connection, _keys, _decode_type, error),
+		do: [error]
 
 
 	def decode({ _id, _query, data}, :map),
