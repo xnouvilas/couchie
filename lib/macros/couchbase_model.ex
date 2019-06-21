@@ -14,8 +14,10 @@ defmodule Couchie.Macros.CouchbaseModel do
       def get(id, type \\ :map),
         do: Couchie.get(unquote(table), to_string(id), type)
 
+
       def set(id, data),
         do: Couchie.set(unquote(table), to_string(id), data)
+
 
       def delete(id),
         do: Couchie.delete(unquote(table), to_string(id))
@@ -31,6 +33,7 @@ defmodule Couchie.Macros.CouchbaseModel do
       def last,
         do: find()
 
+
       def find,
         do: query_one("#{query_base()} LIMIT 1")
 
@@ -43,6 +46,7 @@ defmodule Couchie.Macros.CouchbaseModel do
 
       def where(where),
         do: list(where)
+
 
       def list,
         do: query_list("#{query_base()}")
@@ -74,6 +78,7 @@ defmodule Couchie.Macros.CouchbaseModel do
       def query_one(n1ql_query),
         do: query_list(n1ql_query) |> List.first
 
+
       def query_list(n1ql_query),
         do: Couchie.select(n1ql_query)
 
@@ -95,13 +100,16 @@ defmodule Couchie.Macros.CouchbaseModel do
         do: "#{to_string(field)} = '#{to_string(value)}'"
 
       def argument(field, value) when is_list(value),
-        do: "#{to_string(field)} IN [#{value |> Enum.join(",")}]"
+        do: "#{to_string(field)} IN [#{list_to_string_list(value)}]"
 
       def argument(field, value) when is_tuple(value) and is_bitstring(elem(value, 0)),
         do: "#{to_string(field)} BETWEEN '#{elem(value, 0)}' AND '#{elem(value, 1)}'"
 
       def argument(field, value) when is_tuple(value),
         do: "#{to_string(field)} BETWEEN #{elem(value, 0)} AND #{elem(value, 1)}"
+
+      def argument(field, %{not: value}),
+        do: "#{to_string(field)} NOT IN [#{list_to_string_list(value)}]"
 
       def argument(field, value),
         do: "#{to_string(field)} = #{to_string(value)}"
@@ -112,6 +120,7 @@ defmodule Couchie.Macros.CouchbaseModel do
         |> Enum.map(fn{action, value} -> action(action, value) end)
         |> Enum.join(" ")
       end
+
 
       def action(:limit, value),
         do: "LIMIT #{value}"
@@ -142,6 +151,17 @@ defmodule Couchie.Macros.CouchbaseModel do
          end
 
         Map.merge(struct, processed_map)
+      end
+
+
+      def list_to_string_list(value) do
+        value |> Enum.reduce("", fn e, acc ->
+          if acc != "" do
+            acc <> "," <> "'#{e}'"
+          else
+            "'#{e}'"
+          end
+        end)
       end
 
     end
