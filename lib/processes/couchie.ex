@@ -1,6 +1,10 @@
 defmodule Processes.Couchie do
   use GenServer
 
+  def init(init_arg) do
+    {:ok, init_arg}
+  end
+
   def start_link(opts \\ []) do
     result = GenServer.start_link(__MODULE__, opts)
 
