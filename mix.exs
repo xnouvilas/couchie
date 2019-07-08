@@ -26,8 +26,8 @@ defmodule Couchie.Mixfile do
   defp deps do
     [
 		  {:cberl, github: "chitika/cberl"}, #chitika is authoritative source
-      {:httpoison, "~> 1.4"},
-      {:poison, ">= 1.2.0"}
+      {:httpoison, "~> 1.5"},
+      {:poison, "~> 4.0"}
     ]
   end
 end
